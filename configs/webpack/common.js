@@ -1,54 +1,70 @@
 // shared config (dev and prod)
-const {resolve} = require('path');
-const {CheckerPlugin} = require('awesome-typescript-loader');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { resolve } = require('path')
+const { CheckerPlugin } = require('awesome-typescript-loader')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
   context: resolve(__dirname, '../../src'),
   module: {
     rules: [
       {
+        enforce: 'pre',
+        test: /\.jsx?$/,
+        include: [/src/, /lib/],
+        use: [
+          {
+            loader: 'eslint-loader',
+            options: {
+              cache: true
+            }
+          }
+        ]
+      },
+      {
         test: /\.js$/,
         use: ['babel-loader', 'source-map-loader'],
-        exclude: /node_modules/,
+        exclude: /node_modules/
       },
       {
         test: /\.tsx?$/,
-        use: ['babel-loader', 'awesome-typescript-loader'],
+        use: ['babel-loader', 'awesome-typescript-loader']
       },
       {
         test: /\.css$/,
-        use: ['style-loader', { loader: 'css-loader', options: { importLoaders: 1 } }],
+        use: [
+          'style-loader',
+          { loader: 'css-loader', options: { importLoaders: 1 } }
+        ]
       },
       {
         test: /\.scss$/,
         loaders: [
           'style-loader',
           { loader: 'css-loader', options: { importLoaders: 1 } },
-          'sass-loader',
-        ],
+          'sass-loader'
+        ]
       },
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
         loaders: [
           'file-loader?hash=sha512&digest=hex&name=img/[hash].[ext]',
-          'image-webpack-loader?bypassOnDebug&optipng.optimizationLevel=7&gifsicle.interlaced=false',
-        ],
-      },
-    ],
+          'image-webpack-loader?bypassOnDebug&optipng.optimizationLevel=7&gifsicle.interlaced=false'
+        ]
+      }
+    ]
   },
   plugins: [
     new CheckerPlugin(),
-    new HtmlWebpackPlugin({template: 'index.html.ejs',}),
+    new HtmlWebpackPlugin({ template: 'index.html.ejs' })
   ],
   externals: {
-    'react': 'React',
-    'react-dom': 'ReactDOM',
+    react: 'React',
+    'react-dom': 'ReactDOM'
   },
   performance: {
-    hints: false,
-  },
-};
+    hints: false
+  }
+}
