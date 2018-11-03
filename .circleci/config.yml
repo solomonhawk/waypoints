@@ -1,0 +1,39 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8-browsers
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          name: "Restore Yarn Package Cache"
+          keys:
+            - yarn-packages-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-{{ .Branch }}
+            - yarn-packages-master
+            - yarn-packages-
+      - run:
+          name: "Install Dependencies"
+          command: yarn install
+      - run:
+          name: "Prepare environment"
+          command: cp .env.example .env
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules/
+      - run:
+          name: "JavaScript Linter"
+          command: yarn lint --formatters-dir node_modules/tslint-junit-formatter/formatters --format junit -o reports/junit/js-lint-results.xml
+      - run:
+          name: "Build"
+          command: yarn build
+      - run:
+          name: "Test"
+          environment:
+            JEST_JUNIT_OUTPUT: reports/junit/js-test-results.xml
+          command: yarn test
+      - store_test_results:
+          path: reports/junit

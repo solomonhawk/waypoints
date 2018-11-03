@@ -1,7 +1,5 @@
 import * as React from 'react'
-import './../assets/scss/App.scss'
-
-const reactLogo = require('./../assets/img/react_logo.svg')
+import '../assets/scss/App.scss'
 
 export interface AppProps {}
 
@@ -9,9 +7,7 @@ export default class App extends React.Component<AppProps, {}> {
   render() {
     return (
       <div className="app">
-        <h1>Hello World!</h1>
-        <p>Foo to the barz</p>
-        <img src={reactLogo} height="480" />
+        <h1>Waypoints <sup><small>BETA</small></sup></h1>
       </div>
     )
   }

@@ -26,5 +26,6 @@
   "globals": {
     "DEVELOPMENT": false,
     "FAKE_SERVER": false
-  }
+  },
+  "reporters": ["default", "jest-junit"]
 }

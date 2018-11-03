@@ -12,11 +12,11 @@ module.exports = {
     rules: [
       {
         enforce: 'pre',
-        test: /\.jsx?$/,
+        test: /\.tsx?$/,
         include: [/src/, /lib/],
         use: [
           {
-            loader: 'eslint-loader',
+            loader: 'tslint-loader',
             options: {
               cache: true
             }
