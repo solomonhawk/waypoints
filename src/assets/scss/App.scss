@@ -13,4 +13,13 @@ body,
 
 .app {
   font-family: helvetica, arial, sans-serif;
+  background-color: #455068;
+  display: flex;
+}
+
+.fake-sidebar1,
+.fake-sidebar2 {
+  height: 100%;
+  width: 200px;
+  background: #1e2636;
 }
