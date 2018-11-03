@@ -16,6 +16,12 @@
 ## Installation
 1. Clone/download repo
 2. `yarn install` (or `npm install` for npm)
+3. `cp .env.example .env`
+4. Fill in the required environment variables in `.env`
+
+## Environment Configuration
+
+This project uses [12-Factor Config](https://12factor.net/config). Configuration lives in `.env`. The values required can be found in the `#waypoints` slack channel on Hawk's Nest or by contacting [Solomon Hawk](solomon.hawk@viget.com).
 
 ## Usage
 **Development**

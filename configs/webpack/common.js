@@ -1,13 +1,21 @@
 // shared config (dev and prod)
+
 const { resolve } = require('path')
+const webpack = require('webpack')
 const { CheckerPlugin } = require('awesome-typescript-loader')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+// https://12factor.net/config
+require('../env')
+
+let ctx = resolve(__dirname, '../../src')
+
 module.exports = {
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx']
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    modules: ['node_modules', ctx]
   },
-  context: resolve(__dirname, '../../src'),
+  context: ctx,
   module: {
     rules: [
       {
@@ -58,7 +66,12 @@ module.exports = {
   },
   plugins: [
     new CheckerPlugin(),
-    new HtmlWebpackPlugin({ template: 'index.html.ejs' })
+    new HtmlWebpackPlugin({ template: 'index.html.ejs' }),
+    new webpack.EnvironmentPlugin([
+      'FIREBASE_API_KEY',
+      'FIREBASE_PROJECT_ID',
+      'FIREBASE_SENDER_ID'
+    ])
   ],
   externals: {
     react: 'React',

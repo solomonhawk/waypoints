@@ -7,7 +7,12 @@ export default class App extends React.Component<AppProps, {}> {
   render() {
     return (
       <div className="app">
-        <h1>Waypoints <sup><small>BETA</small></sup></h1>
+        <h1>
+          Waypoints{' '}
+          <sup>
+            <small>BETA</small>
+          </sup>
+        </h1>
       </div>
     )
   }
