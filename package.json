@@ -1,7 +1,7 @@
 {
-  "name": "react-webpack-typescript-starter",
+  "name": "waypoints",
   "version": "0.1.0",
-  "description": "Starter kit for React, Webpack (with Hot Module Replacement), Typescript and Babel.",
+  "description": "Not sure...",
   "keywords": [
     "react",
     "webpack",
@@ -16,12 +16,15 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vikpe/react-webpack-typescript-starter.git"
+    "url": "git+https://github.com/solomonhawk/waypoints.git"
   },
   "bugs": {
-    "url": "https://github.com/vikpe/react-webpack-typescript-starter/issues"
+    "url": "https://github.com/solomonhawk/waypoints/issues"
   },
-  "homepage": "https://github.com/vikpe/react-webpack-typescript-starter",
+  "homepage": "https://github.com/solomonhawk/waypoints",
+  "engines": {
+    "node": "8.12.0"
+  },
   "scripts": {
     "postinstall": "mkdir -p reports/junit",
     "build": "yarn run clean && webpack -p --config=configs/webpack/prod.js",
@@ -31,7 +34,9 @@
     "start:dev": "webpack-dev-server --config=configs/webpack/dev.js",
     "start:prod": "yarn run build && node express.js",
     "test": "jest --coverage --config=configs/jest.json --reporters=default",
-    "test:cov": "NODE_ENV=test jest --config=configs/jest.json --coverage --maxWorkers=2 --reporters=default"
+    "test:cov": "NODE_ENV=test jest --config=configs/jest.json --coverage --maxWorkers=2 --reporters=default",
+    "deploy": "yarn build && now build",
+    "deploy:now": "now build"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.0",
@@ -54,6 +59,7 @@
     "jest": "^23.6.0",
     "jest-junit": "^5.2.0",
     "node-sass": "^4.9.3",
+    "now": "^11.5.2",
     "prettier": "^1.12.1",
     "react": "^16.5.2",
     "react-addons-test-utils": "^15.6.2",

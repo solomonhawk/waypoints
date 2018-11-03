@@ -42,15 +42,17 @@ This project uses [12-Factor Config](https://12factor.net/config). Configuration
 
 **All commands**
 
-Command | Description
---- | ---
-`yarn run start:dev` | Build app continuously (HMR enabled) and serve @ `http://localhost:8080`
-`yarn run start:prod` | Build app once (HMR disabled) and serve @ `http://localhost:3000`
-`yarn run build` | Build app to `/dist/`
-`yarn run test` | Run tests
-`yarn run test:cov` | Run test coverage
-`yarn run lint` | Run Typescript linter
-`yarn run start` | (alias of `yarn run start:dev`)
+| Command               | Description                                                              |
+| --------------------- | ------------------------------------------------------------------------ |
+| `yarn run start:dev`  | Build app continuously (HMR enabled) and serve @ `http://localhost:8080` |
+| `yarn run start:prod` | Build app once (HMR disabled) and serve @ `http://localhost:3000`        |
+| `yarn run build`      | Build app to `/dist/`                                                    |
+| `yarn run test`       | Run tests                                                                |
+| `yarn run test:cov`   | Run test coverage                                                        |
+| `yarn run lint`       | Run Typescript linter                                                    |
+| `yarn run start`      | (alias of `yarn run start:dev`)                                          |
+| `yarn run deploy`     | Deploy with `now`                                                        |
+| `yarn run deploy:now` | Deploy immediately without doing a build first                           |
 
 **Note**: replace `yarn` with `npm` if you use npm.
 
