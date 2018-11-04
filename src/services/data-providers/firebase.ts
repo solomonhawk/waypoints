@@ -12,5 +12,8 @@ firebase.initializeApp({
 })
 
 let db = firebase.firestore()
+let settings = { timestampsInSnapshots: true }
+
+db.settings(settings)
 
 export const markersRef = db.collection('markers')
