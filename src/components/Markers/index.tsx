@@ -4,14 +4,16 @@ import { IMarker } from 'components/App'
 
 export interface IMarkersProps {
   markers: IMarker[]
-  handleMarkerClick: (id: string) => void
+  scale: number
+  onClickMarker: (e: MouseEvent, id: string) => void
   selectedMarkerId: string | null
 }
 
 export default class Markers extends React.Component<IMarkersProps, {}> {
   static defaultProps: Partial<IMarkersProps> = {
     markers: [],
-    handleMarkerClick: (id: string) => {},
+    scale: 1,
+    onClickMarker: (e: MouseEvent, id: string) => {},
     selectedMarkerId: null
   }
 
@@ -28,7 +30,8 @@ export default class Markers extends React.Component<IMarkersProps, {}> {
       <Marker
         key={marker.id}
         {...marker}
-        onClick={this.props.handleMarkerClick}
+        scale={this.props.scale}
+        onClick={e => this.props.onClickMarker(e, marker.id)}
         selected={marker.id === this.props.selectedMarkerId}
       />
     )

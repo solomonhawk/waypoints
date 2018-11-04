@@ -35,8 +35,8 @@
     "start:prod": "yarn run build && node express.js",
     "test": "jest --coverage --config=configs/jest.json --reporters=default",
     "test:cov": "NODE_ENV=test jest --config=configs/jest.json --coverage --maxWorkers=2 --reporters=default",
-    "deploy": "yarn build && now build",
-    "deploy:now": "now build"
+    "deploy": "yarn build && now build --public",
+    "deploy:now": "now build --public"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.0",
@@ -53,14 +53,12 @@
     "dotenv": "^6.1.0",
     "express": "^4.16.3",
     "file-loader": "^2.0.0",
-    "firebase": "^5.5.7",
     "html-webpack-plugin": "^3.2.0",
-    "image-webpack-loader": "^4.3.1",
+    "image-webpack-loader": "3.6.0",
     "jest": "^23.6.0",
     "jest-junit": "^5.2.0",
     "node-sass": "^4.9.3",
     "now": "^11.5.2",
-    "panzoom": "^7.0.2",
     "prettier": "^1.12.1",
     "react": "^16.5.2",
     "react-addons-test-utils": "^15.6.2",
@@ -69,7 +67,6 @@
     "sass-loader": "^7.1.0",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.0",
-    "styled-components": "^4.0.3",
     "tslint": "^5.11.0",
     "tslint-loader": "^3.5.4",
     "typescript": "3.1.1",
@@ -81,6 +78,12 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
-    "react-icons": "^3.2.2"
+    "firebase": "^5.5.7",
+    "panzoom": "^7.0.2",
+    "react-icons": "^3.2.2",
+    "styled-components": "^4.0.3"
+  },
+  "resolutions": {
+    "imagemin-mozjpeg/mozjpeg": "^6.0.0"
   }
 }

@@ -7,11 +7,22 @@ export const Wrapper = styled.div`
 `
 
 export const Marker = styled.button`
+  position: absolute;
+  left: ${p => p.position.x * 100}%;
+  top: ${p => p.position.y * 100}%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
   border: none;
   background: transparent;
-  left: ${props => props.position.x * 100}%;
-  top: ${props => props.position.y * 100}%;
-  position: absolute;
+  cursor: pointer;
+  padding: 0;
+  transform: scale(${p => p.scale});
+  transition: transform 0.5s;
+  margin: -10px 0 0 -10px;
+  z-index: 1;
 
   &:focus {
     outline: none;
@@ -26,40 +37,39 @@ export const Marker = styled.button`
     top 40%;
     left: 50%;
     padding: 100%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(${p => Math.min(1, p.scale * 2)});
     border-radius: 40%;
   }
 `
 
 export const MarkerIcon = styled.div`
-  background: ${props => (props.selected ? '#6BC5F9' : props.color)}
+  background: ${p => (p.selected ? '#6BC5F9' : p.color)}
     linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.3));
-  border: 1px solid ${props => (props.selected ? '#6BC5F9' : props.color)};
+  border: 1px solid ${p => (p.selected ? '#6BC5F9' : p.color)};
   display: block;
   width: 4px;
   height: 4px;
   transform: rotate(45deg);
-  border-radius: ${props => (props.selected ? 0 : '50%')};
+  border-radius: ${p => (p.selected ? 0 : '50%')};
   box-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.5);
 `
 
-const BaseLabel = styled.div`
-  color: ${props => (props.selected ? '#6BC5F9' : '#fff')};
-  text-shadow: 0 0 10px 10px ${props => (props.selected ? '#fff' : '#000')};
+const BaseLabel = styled.p`
+  color: ${p => (p.selected ? '#6BC5F9' : '#fff')};
   position: absolute;
   text-align: center;
   left: 50%;
   transform: translateX(-50%);
-  text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.5);
+  text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.9);
 `
 
 export const Label = styled(BaseLabel)`
   font-size: 10px;
   font-weight: bold
-  bottom: 140%;
+  bottom: 90%;
 `
 
 export const Creator = styled(BaseLabel)`
   font-size: 8px;
-  top: 130%;
+  top: 90%;
 `

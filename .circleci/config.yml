@@ -7,17 +7,17 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          name: "Restore Yarn Package Cache"
+          name: 'Restore Yarn Package Cache'
           keys:
-            - yarn-packages-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - yarn-packages-{{ .Branch }}
-            - yarn-packages-master
-            - yarn-packages-
+            - yarn-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-{{ .Environment.CACHE_VERSION }}-{{ .Branch }}
+            - yarn-packages-{{ .Environment.CACHE_VERSION }}-master
+            - yarn-packages-{{ .Environment.CACHE_VERSION }}-
       - run:
-          name: "Install Dependencies"
+          name: 'Install Dependencies'
           command: yarn install
       - run:
-          name: "Prepare environment"
+          name: 'Prepare environment'
           command: cp .env.example .env
       - save_cache:
           name: Save Yarn Package Cache
@@ -25,13 +25,13 @@ jobs:
           paths:
             - node_modules/
       - run:
-          name: "JavaScript Linter"
+          name: 'JavaScript Linter'
           command: yarn lint --formatters-dir node_modules/tslint-junit-formatter/formatters --format junit -o reports/junit/js-lint-results.xml
       - run:
-          name: "Build"
+          name: 'Build'
           command: yarn build
       - run:
-          name: "Test"
+          name: 'Test'
           environment:
             JEST_JUNIT_OUTPUT: reports/junit/js-test-results.xml
           command: yarn test

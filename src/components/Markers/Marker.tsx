@@ -13,20 +13,11 @@ export default function Marker({
   selected,
   position,
   creator,
+  scale,
   onClick
 }) {
   return (
-    <StyledMarker
-      position={position}
-      onClick={e => {
-        if (e.metaKey) {
-          return
-        }
-
-        onClick(id)
-        e.preventDefault()
-      }}
-    >
+    <StyledMarker position={position} onClick={onClick} scale={scale}>
       <Label selected={selected}>{label}</Label>
       <MarkerIcon color={color} selected={selected} />
       <Creator selected={selected}>{creator}</Creator>

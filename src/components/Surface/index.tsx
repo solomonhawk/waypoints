@@ -6,6 +6,12 @@ import { debounce } from 'lodash'
 // import * as createPanZoom from 'panzoom' - having trouble making this work with TS
 let panzoom = require('panzoom')
 
+export interface ITransform {
+  x: number
+  y: number
+  scale: number
+}
+
 export interface ISurfaceProps {
   width: string | number
   height: string | number
@@ -17,6 +23,7 @@ export interface ISurfaceProps {
   afterPanStart?: () => void
   onPanEnd?: () => void
   afterPanEnd?: () => void
+  afterInteraction?: (t: ITransform) => void
 }
 
 export interface ISurfaceState {
@@ -28,31 +35,33 @@ export default class Surface extends React.Component<
   ISurfaceProps,
   ISurfaceState
 > {
-  panzoomer: any
-  panning: boolean
+  private panzoomer: any
+  private rootRef = React.createRef<HTMLDivElement>()
 
   static defaultProps: Partial<ISurfaceProps> = {
     width: '100%',
     height: '100%',
     zoomSpeed: 0.05,
     minZoom: 0.75,
-    maxZoom: 5,
+    maxZoom: 10,
     onPanStart: () => {},
     afterPanStart: () => {},
     onPanEnd: () => {},
     afterPanEnd: () => {}
   }
 
+  readonly state: ISurfaceState = {
+    isZoomed: false,
+    zoomScale: 1
+  }
+
   constructor(props) {
     super(props)
 
-    this.state = {
-      isZoomed: false,
-      zoomScale: 1
-    }
-
     this.resetZoom = this.resetZoom.bind(this)
     this.onZoom = debounce(this.onZoom.bind(this), 50)
+    this.onTransform = debounce(this.onTransform.bind(this), 50)
+    this.handleKeyPress = this.handleKeyPress.bind(this)
   }
 
   componentDidMount() {
@@ -66,14 +75,14 @@ export default class Surface extends React.Component<
       afterPanEnd
     } = this.props
 
-    if (this.refs.wrapper) {
-      this.panzoomer = panzoom(this.refs.wrapper, {
+    if (this.rootRef) {
+      this.panzoomer = panzoom(this.rootRef.current, {
         zoomSpeed,
         maxZoom,
         minZoom
       })
 
-      this.panzoomer.on('zoom', this.onZoom)
+      this.afterInteraction()
 
       this.panzoomer.on('panstart', () => {
         onPanStart()
@@ -84,6 +93,11 @@ export default class Surface extends React.Component<
         onPanEnd()
         setTimeout(afterPanEnd, 0)
       })
+
+      this.panzoomer.on('zoom', this.onZoom)
+      this.panzoomer.on('transform', this.onTransform)
+
+      document.addEventListener('keypress', this.handleKeyPress)
     }
   }
 
@@ -97,7 +111,7 @@ export default class Surface extends React.Component<
 
     return (
       <Container width={width} height={height}>
-        <Wrapper ref="wrapper">
+        <Wrapper ref={this.rootRef}>
           <FlexWrapper>{this.props.children}</FlexWrapper>
         </Wrapper>
 
@@ -110,20 +124,39 @@ export default class Surface extends React.Component<
     )
   }
 
+  onTransform() {
+    this.afterInteraction()
+  }
+
+  afterInteraction(transform?: ITransform) {
+    this.props.afterInteraction(transform || this.panzoomer.getTransform())
+  }
+
+  handleKeyPress(e) {
+    if (e.key === 'f') {
+      this.resetZoom(e)
+    }
+  }
+
   onZoom(api) {
     let transform = api.getTransform()
     let zoomScale = transform.scale
+    let atDefaultScale = Math.round(zoomScale * 100) === 100
 
     this.setState({
-      isZoomed: Math.round(zoomScale * 100) !== 100,
-      zoomScale
+      isZoomed: !atDefaultScale,
+      zoomScale: atDefaultScale ? 1 : zoomScale
     })
   }
 
   resetZoom(e) {
     if (this.panzoomer) {
+      // pausing here seems to help the case where a pan/fling is settling
+      // when a user presses the hotkey to reset zoom
+      this.panzoomer.pause()
       this.panzoomer.moveTo(0, 0)
       this.panzoomer.zoomAbs(0, 0, 1)
+      this.panzoomer.resume()
     }
 
     e.preventDefault()

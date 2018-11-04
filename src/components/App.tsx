@@ -1,40 +1,19 @@
 import * as React from 'react'
-import 'assets/scss/App.scss'
-import Surface from 'components/Surface'
+import '../assets/scss/App.scss'
+import Surface, { ITransform } from 'components/Surface'
 import Map from 'components/Map'
 import Markers from 'components/Markers'
 import { IconContext } from 'react-icons'
+import Bounds from 'components/Bounds'
 
-let scumMap = require('assets/img/scum-map.jpg')
+let scumMap = require('../assets/img/scum-map.jpg')
 
-let markers: IMarker[] = [
-  {
-    id: '1',
-    label: 'Home Bunker',
-    position: {
-      x: 0.3,
-      y: 0.7
-    },
-    creator: 'Sol',
-    color: '#DE3D5D'
-  },
-  {
-    id: '2',
-    label: 'ShitFactory',
-    position: {
-      x: 0.7,
-      y: 0.4
-    },
-    creator: 'Burris',
-    color: '#EBB942'
-  }
-]
+function lerp(start, end, amt) {
+  return (1 - amt) * start + amt * end
+}
 
-export interface IAppState {
-  markers: IMarker[]
-  selectedMarkerId: string | null
-  panning: boolean
-  userName: string | null
+let interpolateMarkerScale = (scale: number): number => {
+  return lerp(0.2, 1, Math.min(1, 1 / (scale / 1.5)))
 }
 
 export interface IPosition {
@@ -50,11 +29,76 @@ export interface IMarker {
   color: string
 }
 
+export interface IMap {
+  image: string
+  width: number
+  height: number
+}
+
+export interface IMapBounds {
+  width: number
+  height: number
+  top: number
+  left: number
+}
+
+let map: IMap = {
+  image: scumMap,
+  width: 2568,
+  height: 2567
+}
+
+let markers: IMarker[] = [
+  {
+    id: '1',
+    label: 'Home Bunker',
+    position: {
+      x: 0.795,
+      y: 0.895
+    },
+    creator: 'Sol',
+    color: '#DE3D5D'
+  },
+  {
+    id: '2',
+    label: 'Factory',
+    position: {
+      x: 0.845,
+      y: 0.51
+    },
+    creator: 'Burris',
+    color: '#EBB942'
+  },
+  {
+    id: '3',
+    label: 'TopRight',
+    position: {
+      x: 0.75,
+      y: 0.25
+    },
+    creator: 'Sol',
+    color: '#EBB942'
+  }
+]
+
+export interface IAppState {
+  markers: IMarker[]
+  selectedMarkerId: string | null
+  panning: boolean
+  userName: string | null
+  surfaceTransform: ITransform
+}
+
 export default class App extends React.Component<{}, IAppState> {
-  state = {
+  readonly state: IAppState = {
     markers,
     selectedMarkerId: null,
     panning: false,
+    surfaceTransform: {
+      x: 0,
+      y: 0,
+      scale: 1
+    },
     userName: 'Sol' // TODO(shawk): prompt('User Name?')
   }
 
@@ -64,6 +108,8 @@ export default class App extends React.Component<{}, IAppState> {
     this.handleMarkerClick = this.handleMarkerClick.bind(this)
     this.onPanStart = this.onPanStart.bind(this)
     this.afterPanEnd = this.afterPanEnd.bind(this)
+    this.addMarker = this.addMarker.bind(this)
+    this.updateTransform = this.updateTransform.bind(this)
   }
 
   componentDidMount() {
@@ -77,10 +123,10 @@ export default class App extends React.Component<{}, IAppState> {
   }
 
   captureUserName(retry) {
-    let userName = prompt('You must pick a user name.').trim()
+    let userName = prompt('You must pick a user name.') || ''
 
-    if (userName) {
-      this.setState({ userName })
+    if (userName.trim()) {
+      this.setState({ userName: userName.trim() })
     } else {
       if (retry) {
         this.requireUserName(false)
@@ -89,42 +135,84 @@ export default class App extends React.Component<{}, IAppState> {
   }
 
   render() {
-    let { panning, markers, selectedMarkerId } = this.state
+    let { panning, markers, surfaceTransform, selectedMarkerId } = this.state
+    let markerScale = interpolateMarkerScale(surfaceTransform.scale)
 
     return (
       <div className="app">
-        {/*
-          TODO(shawk): This is a problem that needs to be solved in order to
-          show the map marker positions consistently: How do we render the
-          given map into the available dimensions for the Map component given
-          different screen sizes and the possibility of other UI elements being
-          present. I have some thoughts.. this also relates to how we want to
-          store data in firebase for the marker offsets. I was hoping we could
-          maybe store them as floats between 0 and 1 for x and y offset and
-          just scale to whatever map they're on.
-
-          So that's why there are fake sidebars right now.
-        */}
-        <div className="fake-sidebar1" />
         <IconContext.Provider value={{ color: 'blue' }}>
-          <Surface onPanStart={this.onPanStart} afterPanEnd={this.afterPanEnd}>
-            <Map background={scumMap} panning={panning}>
-              <Markers
-                markers={markers}
-                selectedMarkerId={selectedMarkerId}
-                handleMarkerClick={this.handleMarkerClick}
-              />
-            </Map>
+          <Surface
+            onPanStart={this.onPanStart}
+            afterPanEnd={this.afterPanEnd}
+            afterInteraction={this.updateTransform}
+          >
+            <Bounds>
+              {({ bounds, isPortrait }) => (
+                <Map
+                  map={map}
+                  panning={panning}
+                  bounds={bounds}
+                  isPortrait={isPortrait}
+                  onAddMarker={this.addMarker}
+                  zoomScale={surfaceTransform.scale}
+                >
+                  <Markers
+                    markers={markers}
+                    scale={markerScale}
+                    selectedMarkerId={selectedMarkerId}
+                    onClickMarker={this.handleMarkerClick}
+                  />
+                </Map>
+              )}
+            </Bounds>
           </Surface>
         </IconContext.Provider>
-        <div className="fake-sidebar2" />
       </div>
     )
   }
 
-  handleMarkerClick(id) {
+  updateTransform(transform) {
+    this.setState({ surfaceTransform: transform })
+  }
+
+  handleMarkerClick(e, id) {
+    if (e.metaKey) {
+      return
+    }
+
+    this.setState(({ selectedMarkerId }) => ({
+      selectedMarkerId: id === selectedMarkerId ? null : id
+    }))
+
+    e.preventDefault()
+  }
+
+  addMarker(position: IPosition, mapBounds: IMapBounds) {
+    this.requireUserName(true)
+
+    let label = prompt('Marker Label?') || ''
+
+    if (!label.trim()) {
+      alert('You must enter a Label.')
+      return
+    }
+
+    let x = (position.x - mapBounds.left) / mapBounds.width
+    let y = (position.y - mapBounds.top) / mapBounds.height
+
     this.setState({
-      selectedMarkerId: id === this.state.selectedMarkerId ? null : id
+      markers: this.state.markers.concat([
+        {
+          id: String(Math.random()),
+          position: {
+            x,
+            y
+          },
+          label,
+          creator: this.state.userName,
+          color: '#fff'
+        }
+      ])
     })
   }
 
