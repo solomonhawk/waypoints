@@ -153,8 +153,8 @@ export default class App extends React.Component<{}, IAppState> {
     let markerScale = interpolateMarkerScale(surfaceTransform.scale)
 
     return (
-      <div className="app" onClick={this.handleOutsideClick}>
-        <IconContext.Provider value={{ color: plum }}>
+      <IconContext.Provider value={{ color: plum }}>
+        <div className="app" onClick={this.handleOutsideClick}>
           <Surface
             onPanStart={this.onPanStart}
             afterPanEnd={this.afterPanEnd}
@@ -180,8 +180,8 @@ export default class App extends React.Component<{}, IAppState> {
               )}
             </Bounds>
           </Surface>
-        </IconContext.Provider>
-      </div>
+        </div>
+      </IconContext.Provider>
     )
   }
 
@@ -191,8 +191,8 @@ export default class App extends React.Component<{}, IAppState> {
 
   handleKeyDown(e) {
     if (
-      (this.state.selectedMarkerId && e.key === 'Backspace') ||
-      e.key === 'Delete'
+      this.state.selectedMarkerId &&
+      (e.key === 'Backspace' || e.key === 'Delete')
     ) {
       markersRef
         .doc(this.state.selectedMarkerId)
