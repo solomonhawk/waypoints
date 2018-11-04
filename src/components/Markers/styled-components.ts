@@ -55,7 +55,6 @@ export const Marker = styled.button`
     left: 50%;
     pointer-events: none;
     opacity: ${p => (p.highlight ? 0.5 : 0)};
-    // background: radial-gradient(${electricSky}, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
     transform: translate(-50%, -50%) scale(${p =>
       p.highlight ? Math.min(1, p.scale * 2) : 3});
     transition: opacity 0.2s linear, transform 0.3s ease-in-out;

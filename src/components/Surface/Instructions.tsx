@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { InstructionsWrapper, Instruction } from './styled-components'
 
-export default function Instructions({ isZoomed }) {
+export default function Instructions({ showUnderlay }) {
   return (
-    <InstructionsWrapper displayBackdrop={isZoomed}>
+    <InstructionsWrapper displayBackdrop={showUnderlay}>
       <Instruction>
         Click and drag to <b>Pan</b>. Mousewheel / doubleclick to <b>Zoom</b>.
       </Instruction>

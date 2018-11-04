@@ -87,10 +87,10 @@ export const Control = styled.button`
       top: 0;
       color: ${electricSky};
       background: ${plum};
-      box-shadow: 0 2px 40px ${electricSky}, 0 4px 1px ${plum2};
+      box-shadow: 0 3px 0px ${plum2}, 0 2px 40px ${electricSky};
       padding: 4px 6px;
       border-radius: 4px;
-      border: 2px solid ${plum2};
+      border: 1px solid ${plum2};
     }
   `
       : ``};

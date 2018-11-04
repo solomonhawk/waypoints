@@ -7,6 +7,10 @@ import Instructions from './Instructions'
 // import * as createPanZoom from 'panzoom' - having trouble making this work with TS
 let panzoom = require('panzoom')
 
+function equals(target, value) {
+  return Math.round(value * 100) === Math.round(target * 100)
+}
+
 export interface ITransform {
   x: number
   y: number
@@ -28,6 +32,7 @@ export interface ISurfaceProps {
 }
 
 export interface ISurfaceState {
+  hasTransform: boolean
   isZoomed: boolean
   zoomScale: number
 }
@@ -53,6 +58,7 @@ export default class Surface extends React.Component<
 
   readonly state: ISurfaceState = {
     isZoomed: false,
+    hasTransform: false,
     zoomScale: 1
   }
 
@@ -60,7 +66,6 @@ export default class Surface extends React.Component<
     super(props)
 
     this.resetZoom = this.resetZoom.bind(this)
-    this.onZoom = debounce(this.onZoom.bind(this), 50)
     this.onTransform = debounce(this.onTransform.bind(this), 50)
     this.handleKeyPress = this.handleKeyPress.bind(this)
   }
@@ -78,6 +83,7 @@ export default class Surface extends React.Component<
 
     if (this.rootRef) {
       this.panzoomer = panzoom(this.rootRef.current, {
+        smoothScroll: false,
         zoomSpeed,
         maxZoom,
         minZoom
@@ -95,7 +101,6 @@ export default class Surface extends React.Component<
         setTimeout(afterPanEnd, 0)
       })
 
-      this.panzoomer.on('zoom', this.onZoom)
       this.panzoomer.on('transform', this.onTransform)
 
       document.addEventListener('keypress', this.handleKeyPress)
@@ -108,7 +113,7 @@ export default class Surface extends React.Component<
 
   render() {
     let { width, height } = this.props
-    let { isZoomed, zoomScale } = this.state
+    let { hasTransform, isZoomed, zoomScale } = this.state
 
     return (
       <Container width={width} height={height}>
@@ -116,11 +121,12 @@ export default class Surface extends React.Component<
           <FlexWrapper>{this.props.children}</FlexWrapper>
         </Wrapper>
 
-        <Instructions isZoomed={isZoomed} />
+        <Instructions showUnderlay={isZoomed} />
 
         <Controls
           resetZoom={this.resetZoom}
-          isZoomed={isZoomed}
+          showUnderlay={isZoomed}
+          hasTransform={hasTransform}
           zoomScale={zoomScale}
         />
       </Container>
@@ -128,7 +134,20 @@ export default class Surface extends React.Component<
   }
 
   onTransform() {
-    this.afterInteraction()
+    let transform = this.panzoomer.getTransform()
+    let zoomScale = transform.scale
+    let isZoomed = !equals(1, transform.scale)
+
+    let hasTransform =
+      !equals(0, transform.x) || !equals(0, transform.y) || isZoomed
+
+    this.setState({
+      hasTransform,
+      isZoomed,
+      zoomScale: isZoomed ? zoomScale : 1
+    })
+
+    this.afterInteraction(transform)
   }
 
   afterInteraction(transform?: ITransform) {
@@ -139,17 +158,6 @@ export default class Surface extends React.Component<
     if (e.key === 'f') {
       this.resetZoom(e)
     }
-  }
-
-  onZoom(api) {
-    let transform = api.getTransform()
-    let zoomScale = transform.scale
-    let atDefaultScale = Math.round(zoomScale * 100) === 100
-
-    this.setState({
-      isZoomed: !atDefaultScale,
-      zoomScale: atDefaultScale ? 1 : zoomScale
-    })
   }
 
   resetZoom(e) {
