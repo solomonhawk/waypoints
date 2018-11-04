@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Container, Wrapper, FlexWrapper } from './styled-components'
 import Controls from './Controls'
 import { debounce } from 'lodash'
+import Instructions from './Instructions'
 
 // import * as createPanZoom from 'panzoom' - having trouble making this work with TS
 let panzoom = require('panzoom')
@@ -114,6 +115,8 @@ export default class Surface extends React.Component<
         <Wrapper ref={this.rootRef}>
           <FlexWrapper>{this.props.children}</FlexWrapper>
         </Wrapper>
+
+        <Instructions isZoomed={isZoomed} />
 
         <Controls
           resetZoom={this.resetZoom}

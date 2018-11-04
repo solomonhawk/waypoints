@@ -7,7 +7,6 @@ import {
 } from './styled-components'
 
 export default function Marker({
-  id,
   label,
   color,
   selected,
@@ -17,7 +16,12 @@ export default function Marker({
   onClick
 }) {
   return (
-    <StyledMarker position={position} onClick={onClick} scale={scale}>
+    <StyledMarker
+      highlight={selected}
+      position={position}
+      onClick={onClick}
+      scale={scale}
+    >
       <Label selected={selected}>{label}</Label>
       <MarkerIcon color={color} selected={selected} />
       <Creator selected={selected}>{creator}</Creator>

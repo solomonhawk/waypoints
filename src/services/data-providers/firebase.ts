@@ -12,8 +12,5 @@ firebase.initializeApp({
 })
 
 let db = firebase.firestore()
-let markersRef = db.collection('markers')
 
-export default {
-  markersRef
-}
+export const markersRef = db.collection('markers')

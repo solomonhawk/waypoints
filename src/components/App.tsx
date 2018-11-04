@@ -5,6 +5,9 @@ import Map from 'components/Map'
 import Markers from 'components/Markers'
 import { IconContext } from 'react-icons'
 import Bounds from 'components/Bounds'
+import { markersRef } from 'services/data-providers/firebase'
+import ls from 'services/data-providers/local-storage'
+import { plum, randomColor } from 'config/theme'
 
 let scumMap = require('../assets/img/scum-map.jpg')
 
@@ -48,39 +51,6 @@ let map: IMap = {
   height: 2567
 }
 
-let markers: IMarker[] = [
-  {
-    id: '1',
-    label: 'Home Bunker',
-    position: {
-      x: 0.795,
-      y: 0.895
-    },
-    creator: 'Sol',
-    color: '#DE3D5D'
-  },
-  {
-    id: '2',
-    label: 'Factory',
-    position: {
-      x: 0.845,
-      y: 0.51
-    },
-    creator: 'Burris',
-    color: '#EBB942'
-  },
-  {
-    id: '3',
-    label: 'TopRight',
-    position: {
-      x: 0.75,
-      y: 0.25
-    },
-    creator: 'Sol',
-    color: '#EBB942'
-  }
-]
-
 export interface IAppState {
   markers: IMarker[]
   selectedMarkerId: string | null
@@ -91,7 +61,7 @@ export interface IAppState {
 
 export default class App extends React.Component<{}, IAppState> {
   readonly state: IAppState = {
-    markers,
+    markers: [],
     selectedMarkerId: null,
     panning: false,
     surfaceTransform: {
@@ -99,7 +69,7 @@ export default class App extends React.Component<{}, IAppState> {
       y: 0,
       scale: 1
     },
-    userName: 'Sol' // TODO(shawk): prompt('User Name?')
+    userName: null
   }
 
   constructor(props) {
@@ -110,10 +80,25 @@ export default class App extends React.Component<{}, IAppState> {
     this.afterPanEnd = this.afterPanEnd.bind(this)
     this.addMarker = this.addMarker.bind(this)
     this.updateTransform = this.updateTransform.bind(this)
+    this.handleKeyDown = this.handleKeyDown.bind(this)
+    this.handleOutsideClick = this.handleOutsideClick.bind(this)
   }
 
   componentDidMount() {
-    this.requireUserName(true)
+    this.fetchUserName()
+    this.fetchMarkers()
+
+    document.addEventListener('keydown', this.handleKeyDown)
+  }
+
+  fetchUserName() {
+    let userName = ls.get('waypoints-user-name')
+
+    if (!userName) {
+      this.requireUserName(true)
+    } else {
+      this.setState({ userName })
+    }
   }
 
   requireUserName(retry) {
@@ -123,15 +108,44 @@ export default class App extends React.Component<{}, IAppState> {
   }
 
   captureUserName(retry) {
-    let userName = prompt('You must pick a user name.') || ''
+    let response = prompt('You must pick a user name.') || ''
+    let userName = response.trim()
 
-    if (userName.trim()) {
-      this.setState({ userName: userName.trim() })
-    } else {
+    if (!userName) {
       if (retry) {
         this.requireUserName(false)
       }
+    } else if (userName.length > 32) {
+      alert('Shorter... 32 chars max.')
+      if (retry) {
+        this.requireUserName(false)
+      }
+    } else {
+      this.setState({ userName }, () => {
+        ls.set('waypoints-user-name', userName)
+      })
     }
+  }
+
+  fetchMarkers() {
+    markersRef.onSnapshot(
+      querySnapshot => {
+        let markers = []
+
+        querySnapshot.forEach(function(doc) {
+          markers.push({ ...doc.data(), id: doc.id })
+        })
+
+        if (markers.length) {
+          this.setState({
+            markers
+          })
+        }
+      },
+      function(error) {
+        console.error(error)
+      }
+    )
   }
 
   render() {
@@ -139,8 +153,8 @@ export default class App extends React.Component<{}, IAppState> {
     let markerScale = interpolateMarkerScale(surfaceTransform.scale)
 
     return (
-      <div className="app">
-        <IconContext.Provider value={{ color: 'blue' }}>
+      <div className="app" onClick={this.handleOutsideClick}>
+        <IconContext.Provider value={{ color: plum }}>
           <Surface
             onPanStart={this.onPanStart}
             afterPanEnd={this.afterPanEnd}
@@ -175,6 +189,37 @@ export default class App extends React.Component<{}, IAppState> {
     this.setState({ surfaceTransform: transform })
   }
 
+  handleKeyDown(e) {
+    if (
+      (this.state.selectedMarkerId && e.key === 'Backspace') ||
+      e.key === 'Delete'
+    ) {
+      markersRef
+        .doc(this.state.selectedMarkerId)
+        .delete()
+        .then(() => {
+          this.setState({
+            selectedMarkerId: null
+          })
+        })
+        .catch(error => {
+          console.error(error)
+        })
+
+      e.preventDefault()
+    }
+  }
+
+  handleOutsideClick(e) {
+    if (
+      !e.isDefaultPrevented() &&
+      !this.state.panning &&
+      this.state.selectedMarkerId
+    ) {
+      this.setState({ selectedMarkerId: null })
+    }
+  }
+
   handleMarkerClick(e, id) {
     if (e.metaKey) {
       return
@@ -200,20 +245,24 @@ export default class App extends React.Component<{}, IAppState> {
     let x = (position.x - mapBounds.left) / mapBounds.width
     let y = (position.y - mapBounds.top) / mapBounds.height
 
-    this.setState({
-      markers: this.state.markers.concat([
-        {
-          id: String(Math.random()),
-          position: {
-            x,
-            y
-          },
-          label,
-          creator: this.state.userName,
-          color: '#fff'
-        }
-      ])
-    })
+    markersRef
+      .add({
+        position: {
+          x,
+          y
+        },
+        label,
+        creator: this.state.userName,
+        color: randomColor()
+      })
+      .then(doc => {
+        this.setState({
+          selectedMarkerId: doc.id
+        })
+      })
+      .catch(error => {
+        console.error(error)
+      })
   }
 
   onPanStart() {

@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { electricSky } from 'config/theme'
 
 export const Wrapper = styled.div`
   width: 100%;
@@ -37,15 +38,36 @@ export const Marker = styled.button`
     top 40%;
     left: 50%;
     padding: 100%;
+    mix-blend-mode: overlay;
+    opacity: ${p => (p.highlight ? 0.3 : 0)};
+    background: radial-gradient(${electricSky}, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
     transform: translate(-50%, -50%) scale(${p => Math.min(1, p.scale * 2)});
+    transition: opacity 0.5s;
     border-radius: 40%;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 75px;
+    height: 75px;
+    top 40%;
+    left: 50%;
+    pointer-events: none;
+    opacity: ${p => (p.highlight ? 0.5 : 0)};
+    // background: radial-gradient(${electricSky}, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+    transform: translate(-50%, -50%) scale(${p =>
+      p.highlight ? Math.min(1, p.scale * 2) : 3});
+    transition: opacity 0.2s linear, transform 0.3s ease-in-out;
+    border-radius: 50%;
+    border: 1px solid ${electricSky};
   }
 `
 
 export const MarkerIcon = styled.div`
-  background: ${p => (p.selected ? '#6BC5F9' : p.color)}
+  background: ${p => (p.selected ? electricSky : p.color)}
     linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.3));
-  border: 1px solid ${p => (p.selected ? '#6BC5F9' : p.color)};
+  border: 1px solid ${p => (p.selected ? electricSky : p.color)};
   display: block;
   width: 4px;
   height: 4px;
@@ -55,12 +77,13 @@ export const MarkerIcon = styled.div`
 `
 
 const BaseLabel = styled.p`
-  color: ${p => (p.selected ? '#6BC5F9' : '#fff')};
+  color: ${p => (p.selected ? electricSky : '#fff')};
   position: absolute;
   text-align: center;
   left: 50%;
   transform: translateX(-50%);
   text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.9);
+  min-width: 80px;
 `
 
 export const Label = styled(BaseLabel)`
